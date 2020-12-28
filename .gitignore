@@ -4,5 +4,8 @@ build/
 # Exclude binaries and WADs
 bin/
 
+# Exclude save data
+*.dsg
+
 # Exclude VS Code data
 .vscode/
