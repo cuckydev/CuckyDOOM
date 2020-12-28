@@ -72,6 +72,9 @@ P_PointOnLineSide
     fixed_t	dy;
     fixed_t	left;
     fixed_t	right;
+    
+    if (line == NULL)
+		return 0;
 	
     if (!line->dx)
     {

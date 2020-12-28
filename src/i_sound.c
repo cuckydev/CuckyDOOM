@@ -50,9 +50,8 @@ rcsid[] = "$Id: i_unix.c,v 1.5 1997/02/03 22:45:10 b1 Exp $";
 
 
 // Needed for calling the actual sound output.
-#define SAMPLECOUNT		512
-#define NUM_CHANNELS		8
-#define SAMPLERATE		11025	// Hz
+#define SAMPLECOUNT		1024
+#define SAMPLERATE		44100	// Hz
 
 //Sound buffers
 typedef struct
@@ -110,8 +109,9 @@ void I_AudioCallback(void* userdata, Uint8* buffer, int len)
 		mixp = mix_stream;
 		for (int i = 0; i < frames; i++)
 		{
-			*mixp++ += channel->buffer->data[channel->pos.upper] * channel->left_vol;
-			*mixp++ += channel->buffer->data[channel->pos.upper] * channel->right_vol;
+			Sint16 sample = (channel->buffer->data[channel->pos.upper] * (0x10000 - channel->pos.lower) + channel->buffer->data[channel->pos.upper + 1] * channel->pos.lower) >> 8;
+			*mixp++ += (sample * channel->left_vol) >> 8;
+			*mixp++ += (sample * channel->right_vol) >> 8;
 			channel->pos.value += channel->inc.value;
 			if (channel->pos.upper >= channel->buffer->size)
 			{
