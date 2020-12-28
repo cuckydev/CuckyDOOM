@@ -672,96 +672,97 @@ void TryRunTics (void)
 	counts = realtics;
     else
 	counts = availabletics;
-    
-    if (counts < 1)
-	counts = 1;
+	
+	if (counts < 1)
+		counts = 1;
 		
-    frameon++;
-
-    if (debugfile)
+	frameon++;
+	
+	if (debugfile)
 	fprintf (debugfile,
 		 "=======real: %i  avail: %i  game: %i\n",
 		 realtics, availabletics,counts);
-
-    if (!demoplayback)
-    {	
-	// ideally nettics[0] should be 1 - 3 tics above lowtic
-	// if we are consistantly slower, speed up time
-	for (i=0 ; i<MAXPLAYERS ; i++)
-	    if (playeringame[i])
-		break;
-	if (consoleplayer == i)
-	{
-	    // the key player does not adapt
-	}
-	else
-	{
-	    if (nettics[0] <= nettics[nodeforplayer[i]])
-	    {
-		gametime--;
-		// printf ("-");
-	    }
-	    frameskip[frameon&3] = (oldnettics > nettics[nodeforplayer[i]]);
-	    oldnettics = nettics[0];
-	    if (frameskip[0] && frameskip[1] && frameskip[2] && frameskip[3])
-	    {
-		skiptics = 1;
-		// printf ("+");
-	    }
-	}
+	
+	if (!demoplayback)
+	{	
+		// ideally nettics[0] should be 1 - 3 tics above lowtic
+		// if we are consistantly slower, speed up time
+		for (i = 0; i < MAXPLAYERS; i++)
+			if (playeringame[i])
+				break;
+		if (consoleplayer == i)
+		{
+			// the key player does not adapt
+		}
+		else
+		{
+			if (nettics[0] <= nettics[nodeforplayer[i]])
+			{
+				gametime--;
+				// printf ("-");
+			}
+			frameskip[frameon & 3] = (oldnettics > nettics[nodeforplayer[i]]);
+			oldnettics = nettics[0];
+			if (frameskip[0] && frameskip[1] && frameskip[2] && frameskip[3])
+			{
+				skiptics = 1;
+				// printf ("+");
+			}
+		}
     }// demoplayback
 	
     // wait for new tics if needed
     while (lowtic < gametic/ticdup + counts)	
     {
-	NetUpdate ();   
-	lowtic = MAXINT;
-	
-	for (i=0 ; i<doomcom->numnodes ; i++)
-	    if (nodeingame[i] && nettics[i] < lowtic)
-		lowtic = nettics[i];
-	
-	if (lowtic < gametic/ticdup)
-	    I_Error ("TryRunTics: lowtic < gametic");
-				
-	// don't stay in here forever -- give the menu a chance to work
-	if (I_GetTime ()/ticdup - entertic >= 20)
-	{
-	    M_Ticker ();
-	    return;
-	} 
+		NetUpdate ();   
+		lowtic = MAXINT;
+		
+		for (i=0 ; i<doomcom->numnodes ; i++)
+			if (nodeingame[i] && nettics[i] < lowtic)
+			lowtic = nettics[i];
+		
+		if (lowtic < gametic/ticdup)
+			I_Error ("TryRunTics: lowtic < gametic");
+					
+		// don't stay in here forever -- give the menu a chance to work
+		if (I_GetTime ()/ticdup - entertic >= 20)
+		{
+			M_Ticker ();
+			return;
+		} 
     }
     
     // run the count * ticdup dics
     while (counts--)
     {
-	for (i=0 ; i<ticdup ; i++)
-	{
-	    if (gametic/ticdup > lowtic)
-		I_Error ("gametic>lowtic");
-	    if (advancedemo)
-		D_DoAdvanceDemo ();
-	    M_Ticker ();
-	    G_Ticker ();
-	    gametic++;
-	    
-	    // modify command for duplicated tics
-	    if (i != ticdup-1)
-	    {
-		ticcmd_t	*cmd;
-		int			buf;
-		int			j;
-				
-		buf = (gametic/ticdup)%BACKUPTICS; 
-		for (j=0 ; j<MAXPLAYERS ; j++)
+		for (i=0 ; i<ticdup; i++)
 		{
-		    cmd = &netcmds[j][buf];
-		    cmd->chatchar = 0;
-		    if (cmd->buttons & BT_SPECIAL)
-			cmd->buttons = 0;
+			if (gametic/ticdup > lowtic)
+			I_Error ("gametic>lowtic");
+			if (advancedemo)
+			D_DoAdvanceDemo ();
+			M_Ticker ();
+			G_Ticker ();
+			gametic++;
+			
+			// modify command for duplicated tics
+			if (i != ticdup-1)
+			{
+			ticcmd_t	*cmd;
+			int			buf;
+			int			j;
+					
+			buf = (gametic/ticdup)%BACKUPTICS; 
+			for (j=0 ; j<MAXPLAYERS ; j++)
+			{
+				cmd = &netcmds[j][buf];
+				cmd->chatchar = 0;
+				if (cmd->buttons & BT_SPECIAL)
+				cmd->buttons = 0;
+			}
+			}
+			I_WaitVBL(1);
 		}
-	    }
-	}
-	NetUpdate ();	// check for new console commands
+		NetUpdate ();	// check for new console commands
     }
 }

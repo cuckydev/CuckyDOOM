@@ -233,8 +233,6 @@ void I_GetEvent(void)
 //
 void I_StartTic (void)
 {
-	if (!SDL_window)
-		return;
 	
 }
 

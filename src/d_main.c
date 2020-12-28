@@ -370,41 +370,31 @@ void D_DoomLoop (void)
 
     while (1)
     {
-	// frame syncronous IO operations
-	I_StartFrame ();                
-	
-	// process one or more tics
-	if (singletics)
-	{
-	    I_StartTic ();
-	    D_ProcessEvents ();
-	    G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
-	    if (advancedemo)
-		D_DoAdvanceDemo ();
-	    M_Ticker ();
-	    G_Ticker ();
-	    gametic++;
-	    maketic++;
-	}
-	else
-	{
-	    TryRunTics (); // will run at least one tic
-	}
+		// frame syncronous IO operations
+		I_StartFrame ();                
 		
-	S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
-
-	// Update display, next frame, with current state.
-	D_Display ();
-
-#ifndef SNDSERV
-	// Sound mixing for the buffer is snychronous.
-	I_UpdateSound();
-#endif	
-	// Synchronous sound output is explicitly called.
-#ifndef SNDINTR
-	// Update sound output.
-	I_SubmitSound();
-#endif
+		// process one or more tics
+		if (singletics)
+		{
+			I_StartTic ();
+			D_ProcessEvents ();
+			G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
+			if (advancedemo)
+				D_DoAdvanceDemo ();
+			M_Ticker ();
+			G_Ticker ();
+			gametic++;
+			maketic++;
+		}
+		else
+		{
+			TryRunTics (); // will run at least one tic
+		}
+		
+		S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
+		
+		// Update display, next frame, with current state.
+		D_Display ();
     }
 }
 
