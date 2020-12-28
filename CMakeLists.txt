@@ -180,8 +180,6 @@ find_package(PkgConfig QUIET)
 
 # Standard libraries
 target_link_libraries(CuckyDOOM PRIVATE m)
-target_link_libraries(CuckyDOOM PRIVATE X11)
-target_link_libraries(CuckyDOOM PRIVATE Xext)
 
 # Find SDL2
 find_package(SDL2)
