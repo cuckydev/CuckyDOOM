@@ -7,6 +7,8 @@ It's unstable, has no sound, and uses SDL2 for the window and event response, bu
 
 I threw this together in a few hours because I thought it'd be funny.
 
+Still better than clowndoom, though!
+
 ## Dependencies
 
 * SDL2
