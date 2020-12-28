@@ -55,7 +55,8 @@ int I_GetSfxLumpNum (sfxinfo_t* sfxinfo );
 // Starts a sound in a particular sound channel.
 int
 I_StartSound
-( int		id,
+( void *origin,
+  int		id,
   int		vol,
   int		sep,
   int		pitch,
