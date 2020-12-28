@@ -184,6 +184,7 @@ void I_StartFrame (void)
 void I_GetEvent(void)
 {
 	event_t event;
+	Uint32 x;
 	
 	SDL_Event SDL_event;
 	while (SDL_PollEvent(&SDL_event))
@@ -200,92 +201,31 @@ void I_GetEvent(void)
 				event.data1 = TranslateKey(SDL_event.key.keysym.sym);
 				D_PostEvent(&event);
 				break;
+			case SDL_MOUSEBUTTONDOWN:
+			case SDL_MOUSEBUTTONUP:
+				event.type = ev_mouse;
+				x = SDL_GetMouseState(NULL, NULL);
+				event.data1 = 
+				    ((x & SDL_BUTTON_LMASK) ? 1 : 0) |
+				    ((x & SDL_BUTTON_RMASK) ? 2 : 0) |
+				    ((x & SDL_BUTTON_MMASK) ? 4 : 0);
+				event.data2 = 0;
+				event.data3 = 0;
+				D_PostEvent(&event);
+				break;
+			case SDL_MOUSEMOTION:
+				event.type = ev_mouse;
+				x = SDL_event.motion.state;
+				event.data1 = 
+				    ((x & SDL_BUTTON_LMASK) ? 1 : 0) |
+				    ((x & SDL_BUTTON_RMASK) ? 2 : 0) |
+				    ((x & SDL_BUTTON_MMASK) ? 4 : 0);
+				event.data2 =  SDL_event.motion.xrel << 2;
+				event.data3 = -SDL_event.motion.yrel << 2;
+				D_PostEvent(&event);
+				break;
 		}
 	}
-	
-	/*
-	event_t event;
-
-	// put event-grabbing stuff in here
-	XNextEvent(X_display, &X_event);
-	switch (X_event.type)
-	{
-		case KeyPress:
-	event.type = ev_keydown;
-	event.data1 = xlatekey();
-	D_PostEvent(&event);
-	// fprintf(stderr, "k");
-	break;
-		case KeyRelease:
-	event.type = ev_keyup;
-	event.data1 = xlatekey();
-	D_PostEvent(&event);
-	// fprintf(stderr, "ku");
-	break;
-		case ButtonPress:
-	event.type = ev_mouse;
-	event.data1 =
-		(X_event.xbutton.state & Button1Mask)
-		| (X_event.xbutton.state & Button2Mask ? 2 : 0)
-		| (X_event.xbutton.state & Button3Mask ? 4 : 0)
-		| (X_event.xbutton.button == Button1)
-		| (X_event.xbutton.button == Button2 ? 2 : 0)
-		| (X_event.xbutton.button == Button3 ? 4 : 0);
-	event.data2 = event.data3 = 0;
-	D_PostEvent(&event);
-	// fprintf(stderr, "b");
-	break;
-		case ButtonRelease:
-	event.type = ev_mouse;
-	event.data1 =
-		(X_event.xbutton.state & Button1Mask)
-		| (X_event.xbutton.state & Button2Mask ? 2 : 0)
-		| (X_event.xbutton.state & Button3Mask ? 4 : 0);
-	// suggest parentheses around arithmetic in operand of |
-	event.data1 =
-		event.data1
-		^ (X_event.xbutton.button == Button1 ? 1 : 0)
-		^ (X_event.xbutton.button == Button2 ? 2 : 0)
-		^ (X_event.xbutton.button == Button3 ? 4 : 0);
-	event.data2 = event.data3 = 0;
-	D_PostEvent(&event);
-	// fprintf(stderr, "bu");
-	break;
-		case MotionNotify:
-	event.type = ev_mouse;
-	event.data1 =
-		(X_event.xmotion.state & Button1Mask)
-		| (X_event.xmotion.state & Button2Mask ? 2 : 0)
-		| (X_event.xmotion.state & Button3Mask ? 4 : 0);
-	event.data2 = (X_event.xmotion.x - lastmousex) << 2;
-	event.data3 = (lastmousey - X_event.xmotion.y) << 2;
-
-	if (event.data2 || event.data3)
-	{
-		lastmousex = X_event.xmotion.x;
-		lastmousey = X_event.xmotion.y;
-		if (X_event.xmotion.x != X_width/2 &&
-		X_event.xmotion.y != X_height/2)
-		{
-		D_PostEvent(&event);
-		// fprintf(stderr, "m");
-		mousemoved = false;
-		} else
-		{
-		mousemoved = true;
-		}
-	}
-	break;
-	
-		case Expose:
-		case ConfigureNotify:
-	break;
-	
-		default:
-	if (doShm && X_event.type == X_shmeventtype) shmFinished = true;
-	break;
-	}
-	*/
 }
 
 //
@@ -427,228 +367,10 @@ void I_InitGraphics(void)
 	if ((SDL_gamesurf = SDL_CreateTexture(SDL_renderer, window_format, SDL_TEXTUREACCESS_STREAMING, SCREENWIDTH, SCREENHEIGHT)) == NULL)
 		I_Error((char*)SDL_GetError());
 	
-/*
-	char*		displayname;
-	char*		d;
-	int			n;
-	int			pnum;
-	int			x=0;
-	int			y=0;
+	//Lock mouse in window
+	if (SDL_SetRelativeMouseMode(SDL_TRUE) < 0)
+		I_Error((char*)SDL_GetError());
 	
-	// warning: char format, different type arg
-	char		xsign=' ';
-	char		ysign=' ';
-	
-	int			oktodraw;
-	unsigned long	attribmask;
-	XSetWindowAttributes attribs;
-	XGCValues		xgcvalues;
-	int			valuemask;
-	static int		firsttime=1;
-
-	if (!firsttime)
-	return;
-	firsttime = 0;
-
-	signal(SIGINT, (void (*)(int)) I_Quit);
-
-	if (M_CheckParm("-2"))
-	multiply = 2;
-
-	if (M_CheckParm("-3"))
-	multiply = 3;
-
-	if (M_CheckParm("-4"))
-	multiply = 4;
-
-	X_width = SCREENWIDTH * multiply;
-	X_height = SCREENHEIGHT * multiply;
-
-	// check for command-line display name
-	if ( (pnum=M_CheckParm("-disp")) ) // suggest parentheses around assignment
-	displayname = myargv[pnum+1];
-	else
-	displayname = 0;
-
-	// check if the user wants to grab the mouse (quite unnice)
-	grabMouse = !!M_CheckParm("-grabmouse");
-
-	// check for command-line geometry
-	if ( (pnum=M_CheckParm("-geom")) ) // suggest parentheses around assignment
-	{
-	// warning: char format, different type arg 3,5
-	n = sscanf(myargv[pnum+1], "%c%d%c%d", &xsign, &x, &ysign, &y);
-	
-	if (n==2)
-		x = y = 0;
-	else if (n==6)
-	{
-		if (xsign == '-')
-		x = -x;
-		if (ysign == '-')
-		y = -y;
-	}
-	else
-		I_Error("bad -geom parameter");
-	}
-
-	// open the display
-	X_display = XOpenDisplay(displayname);
-	if (!X_display)
-	{
-	if (displayname)
-		I_Error("Could not open display [%s]", displayname);
-	else
-		I_Error("Could not open display (DISPLAY=[%s])", getenv("DISPLAY"));
-	}
-
-	// use the default visual 
-	X_screen = DefaultScreen(X_display);
-	if (!XMatchVisualInfo(X_display, X_screen, 8, PseudoColor, &X_visualinfo))
-	I_Error("xdoom currently only supports 256-color PseudoColor screens");
-	X_visual = X_visualinfo.vi	//Get palette format
-	Uint32 window_format = SDL_GetWindowPixelFormat(SDL_window);
-	if ((SDL_palformat = SDL_AllocFormat(window_format)) == NULL)
-		I_Error((char*)SDL_GetError());sual;
-
-	// check for the MITSHM extension
-	doShm = XShmQueryExtension(X_display);
-
-	// even if it's available, make sure it's a local connection
-	if (doShm)
-	{
-	if (!displayname) displayname = (char *) getenv("DISPLAY");
-	if (displayname)
-	{
-		d = displayname;
-		while (*d && (*d != ':')) d++;
-		if (*d) *d = 0;
-		if (!(!strcasecmp(displayname, "unix") || !*displayname)) doShm = false;
-	}
-	}
-
-	fprintf(stderr, "Using MITSHM extension\n");
-
-	// create the colormap
-	X_cmap = XCreateColormap(X_display, RootWindow(X_display,
-							 X_screen), X_visual, AllocAll);
-
-	// setup attributes for main window
-	attribmask = CWEventMask | CWColormap | CWBorderPixel;
-	attribs.event_mask =
-	KeyPressMask
-	| KeyReleaseMask
-	// | PointerMotionMask | ButtonPressMask | ButtonReleaseMask
-	| ExposureMask;
-
-	attribs.colormap = X_cmap;
-	attribs.border_pixel = 0;
-
-	// create the main window
-	X_mainWindow = XCreateWindow(	X_display,
-					RootWindow(X_display, X_screen),
-					x, y,
-					X_width, X_height,
-					0, // borderwidth
-					8, // depth
-					InputOutput,
-					X_visual,
-					attribmask,
-					&attribs );
-
-	XDefineCursor(X_display, X_mainWindow,
-			createnullcursor( X_display, X_mainWindow ) );
-
-	// create the GC
-	valuemask = GCGraphicsExposures;
-	xgcvalues.graphics_exposures = False;
-	X_gc = XCreateGC(	X_display,
-				X_mainWindow,
-				valuemask,
-				&xgcvalues );
-
-	// map the window
-	XMapWindow(X_display, X_mainWindow);
-
-	// wait until it is OK to draw
-	oktodraw = 0;
-	while (!oktodraw)
-	{
-	XNextEvent(X_display, &X_event);
-	if (X_event.type == Expose
-		&& !X_event.xexpose.count)
-	{
-		oktodraw = 1;
-	}
-	}
-
-	// grabs the pointer so it is restricted to this window
-	if (grabMouse)
-	XGrabPointer(X_display, X_mainWindow, True,
-			 ButtonPressMask|ButtonReleaseMask|PointerMotionMask,
-			 GrabModeAsync, GrabModeAsync,
-			 X_mainWindow, None, CurrentTime);
-
-	if (doShm)
-	{
-
-	X_shmeventtype = XShmGetEventBase(X_display) + ShmCompletion;
-
-	// create the image
-	image = XShmCreateImage(	X_display,
-					X_visual,
-					8,
-					ZPixmap,
-					0,
-					&X_shminfo,
-					X_width,
-					X_height );
-
-	grabsharedmemory(image->bytes_per_line * image->height);
-
-
-	// UNUSED
-	// create the shared memory segment
-	// X_shminfo.shmid = shmget (IPC_PRIVATE,
-	// image->bytes_per_line * image->height, IPC_CREAT | 0777);
-	// if (X_shminfo.shmid < 0)
-	// {
-	// perror("");
-	// I_Error("shmget() failed in InitGraphics()");
-	// }
-	// fprintf(stderr, "shared memory id=%d\n", X_shminfo.shmid);
-	// attach to the shared memory segment
-	// image->data = X_shminfo.shmaddr = shmat(X_shminfo.shmid, 0, 0);
-	
-
-	if (!image->data)
-	{
-		perror("");
-		I_Error("shmat() failed in InitGraphics()");
-	}
-
-	// get the X server to attach to it
-	if (!XShmAttach(X_display, &X_shminfo))
-		I_Error("XShmAttach() failed in InitGraphics()");
-
-	}
-	else
-	{
-	image = XCreateImage(	X_display,
-					X_visual,
-					8,
-					ZPixmap,
-					0,
-					(char*)malloc(X_width * X_height),
-					X_width, X_height,
-					8,
-					X_width );
-
-	}
-
-	if (multiply == 1)
-	screens[0] = (unsigned char *) (image->data);
-	else
-	screens[0] = (unsigned char *) malloc (SCREENWIDTH * SCREENHEIGHT);
-*/
+	//Allocate screen 0
+	screens[0] = malloc(SCREENWIDTH * SCREENHEIGHT);
 }

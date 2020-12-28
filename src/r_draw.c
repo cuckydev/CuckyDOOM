@@ -119,7 +119,7 @@ void R_DrawColumn (void)
     if ((unsigned)dc_x >= SCREENWIDTH
 	|| dc_yl < 0
 	|| dc_yh >= SCREENHEIGHT) 
-	I_Error ("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x); 
+	return;//I_Error ("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x); 
 #endif 
 
     // Framebuffer destination address.
@@ -228,7 +228,7 @@ void R_DrawColumnLow (void)
 	|| dc_yh >= SCREENHEIGHT)
     {
 	
-	I_Error ("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
+	return;//I_Error ("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
     }
     //	dccount++; 
 #endif 
@@ -654,8 +654,8 @@ void R_DrawSpanLow (void)
 	|| ds_x2>=SCREENWIDTH  
 	|| (unsigned)ds_y>SCREENHEIGHT)
     {
-	I_Error( "R_DrawSpan: %i to %i at %i",
-		 ds_x1,ds_x2,ds_y);
+	return;//I_Error( "R_DrawSpan: %i to %i at %i",
+		// ds_x1,ds_x2,ds_y);
     }
 //	dscount++; 
 #endif 

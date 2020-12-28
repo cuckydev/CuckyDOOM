@@ -206,17 +206,7 @@ extern long	showMessages;
 // machine-independent sound params
 extern	long	numChannels;
 
-
-// UNIX hack, to be removed.
-#ifdef SNDSERV
-extern char *sndserver_filename;
 extern long   mb_used;
-#endif
-
-#ifdef LINUX
-char *mousetype;
-char *mousedev;
-#endif
 
 extern char*	chat_macros[];
 
@@ -249,20 +239,9 @@ default_t	defaults[] =
     {"key_use", &key_use, ' '},
     {"key_strafe", &key_strafe, KEY_RALT},
     {"key_speed", &key_speed, KEY_RSHIFT},
-
-// UNIX hack, to be removed. 
-#ifdef SNDSERV
-    {"sndserver", (long*)&sndserver_filename, (long)"sndserver"},
-#endif
-    
 #endif
 
     {"mb_used", &mb_used, 8},
-
-#ifdef LINUX
-    {"mousedev", (long*)&mousedev, (long)"/dev/ttyS0"},
-    {"mousetype", (long*)&mousetype, (long)"microsoft"},
-#endif
 
     {"use_mouse", &usemouse, 1},
     {"mouseb_fire", &mousebfire, 0},

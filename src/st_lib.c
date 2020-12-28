@@ -120,7 +120,7 @@ STlib_drawNum
     x = n->x - numdigits*w;
 
     if (n->y - ST_Y < 0)
-	I_Error("drawNum: n->y - ST_Y < 0");
+	return;//I_Error("drawNum: n->y - ST_Y < 0");
 
     V_CopyRect(x, n->y - ST_Y, BG, w*numdigits, h, x, n->y, FG);
 
@@ -230,7 +230,7 @@ STlib_updateMultIcon
 	    h = SHORT(mi->p[mi->oldinum]->height);
 
 	    if (y - ST_Y < 0)
-		I_Error("updateMultIcon: y - ST_Y < 0");
+			return;//I_Error("updateMultIcon: y - ST_Y < 0");
 
 	    V_CopyRect(x, y-ST_Y, BG, w, h, x, y, FG);
 	}
@@ -279,7 +279,7 @@ STlib_updateBinIcon
 	h = SHORT(bi->p->height);
 
 	if (y - ST_Y < 0)
-	    I_Error("updateBinIcon: y - ST_Y < 0");
+	    return;//I_Error("updateBinIcon: y - ST_Y < 0");
 
 	if (*bi->val)
 	    V_DrawPatch(bi->x, bi->y, FG, bi->p);

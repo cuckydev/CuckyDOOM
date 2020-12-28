@@ -94,6 +94,7 @@ list(APPEND CMAKE_MODULE_PATH
 ##################
 
 # DOOM flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ggdb3 -fsanitize=address")
 target_compile_definitions(CuckyDOOM PRIVATE NORMALUNIX)
 target_compile_definitions(CuckyDOOM PRIVATE LINUX)
 
