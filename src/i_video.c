@@ -277,9 +277,9 @@ void I_SetPalette (byte* palette)
 	//Remap palette to RGB
 	for (int i = 0; i < 256; i++)
 	{
-		byte r = *palette++; //Apparently SDL_MapRGB is a macro because doing this inline completely breaks it
-		byte g = *palette++;
-		byte b = *palette++;
+		byte r = gammatable[usegamma][*palette++]; //Apparently SDL_MapRGB is a macro because doing this inline completely breaks it
+		byte g = gammatable[usegamma][*palette++];
+		byte b = gammatable[usegamma][*palette++];
 		SDL_gamepal[i] = SDL_MapRGB(SDL_palformat, r, g, b);
 	}
 }
