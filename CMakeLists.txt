@@ -7,6 +7,8 @@ endif()
 ###########
 # Options #
 ###########
+option(SANITIZE "Enable sanitization" OFF)
+
 option(LTO "Enable link-time optimization" OFF)
 option(PKG_CONFIG_STATIC_LIBS "On platforms with pkg-config, static-link the dependencies (good for Windows builds, so you don't need to bundle DLL files)" OFF)
 option(MSVC_LINK_STATIC_RUNTIME "Link the static MSVC runtime library (Visual Studio only)" OFF)
@@ -94,7 +96,9 @@ list(APPEND CMAKE_MODULE_PATH
 ##################
 
 # DOOM flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ggdb3 -fsanitize=address")
+if(SANITIZE)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ggdb3 -fsanitize=address")
+endif()
 target_compile_definitions(CuckyDOOM PRIVATE NORMALUNIX)
 target_compile_definitions(CuckyDOOM PRIVATE LINUX)
 
