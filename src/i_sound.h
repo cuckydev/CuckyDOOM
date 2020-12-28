@@ -33,10 +33,6 @@
 // Init at program start...
 void I_InitSound();
 
-// ... update sound buffer and audio device at runtime...
-void I_UpdateSound(void);
-void I_SubmitSound(void);
-
 // ... shut down and relase at program termination.
 void I_ShutdownSound(void);
 
@@ -57,28 +53,19 @@ int
 I_StartSound
 ( void *origin,
   int		id,
-  int		vol,
-  int		sep,
-  int		pitch,
-  int		priority );
+  int		vol);
 
 
 // Stops a sound channel.
-void I_StopSound(int handle);
+void I_StopSound(void *origin);
+void I_StopAllSound();
+
+void I_UpdateSounds();
 
 // Called by S_*() functions
 //  to see if a channel is still playing.
 // Returns 0 if no longer playing, 1 if playing.
 int I_SoundIsPlaying(int handle);
-
-// Updates the volume, separation,
-//  and pitch of a sound channel.
-void
-I_UpdateSoundParams
-( int		handle,
-  int		vol,
-  int		sep,
-  int		pitch );
 
 
 //

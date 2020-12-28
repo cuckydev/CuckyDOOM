@@ -135,6 +135,9 @@ int TranslateKey(SDL_KeyCode keycode)
 
 void I_ShutdownGraphics(void)
 {
+	//Unlock mouse from window
+	SDL_SetRelativeMouseMode(SDL_FALSE);
+	
 	//Free other rendering stuff
 	if (SDL_palformat != NULL)
 		SDL_FreeFormat(SDL_palformat);

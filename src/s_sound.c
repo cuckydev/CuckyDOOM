@@ -48,38 +48,6 @@ rcsid[] = "$Id: s_sound.c,v 1.6 1997/02/03 22:45:12 b1 Exp $";
 const char snd_prefixen[]
 = { 'P', 'P', 'A', 'S', 'S', 'S', 'M', 'M', 'M', 'S', 'S', 'S' };
 
-#define S_MAX_VOLUME		127
-
-// when to clip out sounds
-// Does not fit the large outdoor areas.
-#define S_CLIPPING_DIST		(1200*0x10000)
-
-// Distance tp origin when sounds should be maxed out.
-// This should relate to movement clipping resolution
-// (see BLOCKMAP handling).
-// Originally: (200*0x10000).
-#define S_CLOSE_DIST		(160*0x10000)
-
-
-#define S_ATTENUATOR		((S_CLIPPING_DIST-S_CLOSE_DIST)>>FRACBITS)
-
-// Adjustable by menu.
-#define NORM_VOLUME    		snd_MaxVolume
-
-#define NORM_PITCH     		128
-#define NORM_PRIORITY		64
-#define NORM_SEP		128
-
-#define S_PITCH_PERTURB		1
-#define S_STEREO_SWING		(96*0x10000)
-
-// percent attenuation from front to back
-#define S_IFRACVOL		30
-
-#define NA			0
-#define S_NUMCHANNELS		2
-
-
 // Current music/sfx card - index useless
 //  w/o a reference LUT in a sound module.
 extern int snd_MusicDevice;
@@ -165,6 +133,9 @@ void S_Init
 //
 void S_Start(void)
 {
+	// kill all playing sounds at start of level
+	//  (trust me - a good idea)
+	I_StopAllSound();
 	/*
   int cnum;
   int mnum;
@@ -223,19 +194,13 @@ S_StartSoundAtVolume
   int		sfx_id,
   int		volume )
 {
-	int rc;
-	int sep;
-	int pitch;
-	int priority;
-	
-	mobj_t* origin = (mobj_t*)origin_p;
-	
 	//Check for bogus sound #
 	if (sfx_id < 1 || sfx_id > NUMSFX)
 		I_Error("Bad sfx #: %d", sfx_id);
 	
+	/*
 	sfxinfo_t *sfx = &S_sfx[sfx_id];
-
+	
 	//Initialize sound parameters
 	if (sfx->link)
 	{
@@ -291,125 +256,12 @@ S_StartSoundAtVolume
 		else if (pitch > 255)
 			pitch = 255;
 	}
-	
-	//TODO: kill previous sounds under the same origin
-	
-	I_StartSound(origin_p, sfx_id, volume, sep, pitch, priority);
-/*
-  int		rc;
-  int		sep;
-  int		pitch;
-  int		priority;
-  sfxinfo_t*	sfx;
-  int		cnum;
-  
-  mobj_t*	origin = (mobj_t *) origin_p;
-  
-  // check for bogus sound #
-  if (sfx_id < 1 || sfx_id > NUMSFX)
-    I_Error("Bad sfx #: %d", sfx_id);
-  
-  sfx = &S_sfx[sfx_id];
-  
-  // Initialize sound parameters
-  if (sfx->link)
-  {
-    pitch = sfx->pitch;
-    priority = sfx->priority;
-    volume += sfx->volume;
-    
-    if (volume < 1)
-      return;
-    
-    if (volume > snd_SfxVolume)
-      volume = snd_SfxVolume;
-  }	
-  else
-  {
-    pitch = NORM_PITCH;
-    priority = NORM_PRIORITY;
-  }
-
-
-  // Check to see if it is audible,
-  //  and if not, modify the params
-  if (origin && origin != players[consoleplayer].mo)
-  {
-    rc = S_AdjustSoundParams(players[consoleplayer].mo,
-			     origin,
-			     &volume,
-			     &sep,
-			     &pitch);
-	
-    if ( origin->x == players[consoleplayer].mo->x
-	 && origin->y == players[consoleplayer].mo->y)
-    {	
-      sep 	= NORM_SEP;
-    }
-    
-    if (!rc)
-      return;
-  }	
-  else
-  {
-    sep = NORM_SEP;
-  }
-  
-  // hacks to vary the sfx pitches
-  if (sfx_id >= sfx_sawup
-      && sfx_id <= sfx_sawhit)
-  {	
-    pitch += 8 - (M_Random()&15);
-    
-    if (pitch<0)
-      pitch = 0;
-    else if (pitch>255)
-      pitch = 255;
-  }
-  else if (sfx_id != sfx_itemup
-	   && sfx_id != sfx_tink)
-  {
-    pitch += 16 - (M_Random()&31);
-    
-    if (pitch<0)
-      pitch = 0;
-    else if (pitch>255)
-      pitch = 255;
-  }
-
-  // kill old sound
-  S_StopSound(origin);
-
-  // try to find a channel
-  cnum = S_getChannel(origin, sfx);
-  
-  if (cnum<0)
-    return;
-
-  //
-  // This is supposed to handle the loading/caching.
-  // For some odd reason, the caching is done nearly
-  //  each time the sound is needed?
-  //
-  
-  // get lumpnum if necessary
-  if (sfx->lumpnum < 0)
-    sfx->lumpnum = I_GetSfxLumpNum(sfx);
-  
-  // increase the usefulness
-  if (sfx->usefulness++ < 0)
-    sfx->usefulness = 1;
-  
-  // Assigns the handle to one of the channels in the
-  //  mix/output buffer.
-  channels[cnum].handle = I_StartSound(sfx_id,
-				       //sfx->data,
-				       volume,
-				       sep,
-				       pitch,
-				       priority);
 	*/
-}	
+	
+	//Play sound
+	S_StopSound(origin_p);
+	I_StartSound(origin_p, sfx_id, volume);
+}
 
 void
 S_StartSound
@@ -489,27 +341,8 @@ S_StartSound
 
 void S_StopSound(void *origin)
 {
-/*
-    int cnum;
-
-    for (cnum=0 ; cnum<numChannels ; cnum++)
-    {
-	if (channels[cnum].sfxinfo && channels[cnum].origin == origin)
-	{
-	    S_StopChannel(cnum);
-	    break;
-	}
-    }
-*/
+	I_StopSound(origin);
 }
-
-
-
-
-
-
-
-
 
 //
 // Stop and resume music, during game PAUSE.
@@ -538,6 +371,7 @@ void S_ResumeSound(void)
 //
 void S_UpdateSounds(void* listener_p)
 {
+	I_UpdateSounds();
 	/*
     int		audible;
     int		cnum;
@@ -751,84 +585,6 @@ void S_StopChannel(int cnum)
     }
     */
 }
-
-
-
-//
-// Changes volume, stereo-separation, and pitch variables
-//  from the norm of a sound effect to be played.
-// If the sound is not audible, returns a 0.
-// Otherwise, modifies parameters and returns 1.
-//
-int
-S_AdjustSoundParams
-( mobj_t*	listener,
-  mobj_t*	source,
-  int*		vol,
-  int*		sep,
-  int*		pitch )
-{
-    fixed_t	approx_dist;
-    fixed_t	adx;
-    fixed_t	ady;
-    angle_t	angle;
-
-    // calculate the distance to sound origin
-    //  and clip it if necessary
-    adx = abs(listener->x - source->x);
-    ady = abs(listener->y - source->y);
-
-    // From _GG1_ p.428. Appox. eucledian distance fast.
-    approx_dist = adx + ady - ((adx < ady ? adx : ady)>>1);
-    
-    if (gamemap != 8
-	&& approx_dist > S_CLIPPING_DIST)
-    {
-	return 0;
-    }
-    
-    // angle of source to listener
-    angle = R_PointToAngle2(listener->x,
-			    listener->y,
-			    source->x,
-			    source->y);
-
-    if (angle > listener->angle)
-	angle = angle - listener->angle;
-    else
-	angle = angle + (0xffffffff - listener->angle);
-
-    angle >>= ANGLETOFINESHIFT;
-
-    // stereo separation
-    *sep = 128 - (FixedMul(S_STEREO_SWING,finesine[angle&FINEMASK])>>FRACBITS);
-
-    // volume calculation
-    if (approx_dist < S_CLOSE_DIST)
-    {
-	*vol = snd_SfxVolume;
-    }
-    else if (gamemap == 8)
-    {
-	if (approx_dist > S_CLIPPING_DIST)
-	    approx_dist = S_CLIPPING_DIST;
-
-	*vol = 15+ ((snd_SfxVolume-15)
-		    *((S_CLIPPING_DIST - approx_dist)>>FRACBITS))
-	    / S_ATTENUATOR;
-    }
-    else
-    {
-	// distance effect
-	*vol = (snd_SfxVolume
-		* ((S_CLIPPING_DIST - approx_dist)>>FRACBITS))
-	    / S_ATTENUATOR; 
-    }
-    
-    return (*vol > 0);
-}
-
-
 
 
 //
