@@ -483,8 +483,6 @@ void I_UpdateSounds()
 	int sep;
 	int pitch;
 	
-	return;
-	
 	//Lock audio device
 	SDL_LockAudioDevice(SDL_audiodevice);
 	
@@ -529,7 +527,6 @@ void I_UpdateSounds()
 			
 			if (!audible)
 			{
-				printf("stopped a no longer audible sound\n");
 				I_ReleaseChannel(channel);
 				channel = next;
 				continue;
