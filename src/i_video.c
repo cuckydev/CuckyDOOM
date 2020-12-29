@@ -273,6 +273,9 @@ void I_GetEvent(void)
 			case SDL_WINDOWEVENT:
 				switch (SDL_event.window.event)
 				{
+					case SDL_WINDOWEVENT_CLOSE:
+						I_Quit();
+						break;
 					case SDL_WINDOWEVENT_FOCUS_LOST:
 						focus_yield = true;
 						mouse_down = 0;

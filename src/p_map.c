@@ -64,7 +64,7 @@ line_t*		ceilingline;
 
 // keep track of special lines as they are hit,
 // but don't process them until the move is proven valid
-#define MAXSPECIALCROSS		8
+#define MAXSPECIALCROSS		64
 
 line_t*		spechit[MAXSPECIALCROSS];
 int		numspechit;
@@ -239,8 +239,10 @@ boolean PIT_CheckLine (line_t* ld)
     // if contacted a special line, add it to the list
     if (ld->special)
     {
-	spechit[numspechit] = ld;
-	numspechit++;
+		if (numspechit >= MAXSPECIALCROSS)
+			I_Error("PIT_CheckLine: too many special crosses");
+		spechit[numspechit] = ld;
+		numspechit++;
     }
 
     return true;

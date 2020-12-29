@@ -145,26 +145,26 @@ byte*		savebuffer;
 // 
 // controls (have defaults) 
 // 
-int             key_right;
-int		key_left;
+long             key_right;
+long		key_left;
 
-int		key_up;
-int		key_down; 
-int             key_strafeleft;
-int		key_straferight; 
-int             key_fire;
-int		key_use;
-int		key_strafe;
-int		key_speed; 
- 
-int             mousebfire; 
-int             mousebstrafe; 
-int             mousebforward; 
- 
-int             joybfire; 
-int             joybstrafe; 
-int             joybuse; 
-int             joybspeed; 
+long		key_up;
+long		key_down; 
+long             key_strafeleft;
+long		key_straferight; 
+long             key_fire;
+long		key_use;
+long		key_strafe;
+long		key_speed; 
+
+long             mousebfire; 
+long             mousebstrafe; 
+long             mousebforward; 
+
+long             joybfire; 
+long             joybstrafe; 
+long             joybuse; 
+long             joybspeed; 
  
  
  

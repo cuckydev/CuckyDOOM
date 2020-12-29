@@ -73,8 +73,6 @@ static musicinfo_t*	mus_playing=0;
 // following is set
 //  by the defaults code in M_misc:
 // number of channels available
-int			numChannels;	
-
 static int		nextcleanup;
 
 

@@ -204,9 +204,6 @@ extern long	screenblocks;
 
 extern long	showMessages;
 
-// machine-independent sound params
-extern	long	numChannels;
-
 extern long   mb_used;
 
 extern char*	chat_macros[];
@@ -255,8 +252,6 @@ default_t	defaults[] =
 	
 	{"screenblocks", &screenblocks, 9},
 	{"detaillevel", &detailLevel, 0},
-	
-	{"snd_channels", &numChannels, 3},
 	
 	{"usegamma", &usegamma, 0},
 	

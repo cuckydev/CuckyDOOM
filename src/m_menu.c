@@ -83,8 +83,8 @@ long			showMessages;
 	
 
 // Blocky mode, has default, 0 = high, 1 = normal
-int			detailLevel;		
-int			screenblocks;		// has default
+long			detailLevel;		
+long			screenblocks;		// has default
 
 // temp for screenblocks (0-9)
 long			screenSize;		

@@ -188,6 +188,14 @@ void CD_WadPicker()
 				case SDL_QUIT:
 					exit = true;
 					break;
+				case SDL_WINDOWEVENT:
+					switch (event.window.event)
+					{
+						case SDL_WINDOWEVENT_CLOSE:
+							exit = true;
+							break;
+					}
+					break;
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.scancode)
 					{
