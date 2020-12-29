@@ -591,9 +591,12 @@ void I_ShutdownSound(void)
 	I_StopAllSound();
 	
 	//Free sound buffer
-	for (int i = 1; i < NUMSFX; i++) //SFX 0 is never initialized
-		free(sfx_buffer[i].data);
-	free(sfx_buffer);
+	if (sfx_buffer != NULL)
+	{
+		for (int i = 1; i < NUMSFX; i++) //SFX 0 is never initialized
+			free(sfx_buffer[i].data);
+		free(sfx_buffer);
+	}
 }
 
 void I_InitSound()

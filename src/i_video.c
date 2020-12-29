@@ -61,6 +61,10 @@ void (*SDL_surffunc)(void*, int) = NULL;
 SDL_PixelFormat *SDL_palformat = NULL;
 Uint32 SDL_gamepal[256];
 
+// Input crap
+int mouse_down;
+boolean keys[0x100];
+
 // Blocky mode,
 // replace each 320x200 pixel with multiply*multiply
 // According to Dave Taylor, it still is a bonehead thing
@@ -91,7 +95,7 @@ void I_SetWindowSubtitle(const char *title)
 //
 // Translate an SDL_KeyCode to DOOM keycodes
 //
-int TranslateKey(SDL_KeyCode keycode)
+unsigned char TranslateKey(SDL_KeyCode keycode)
 {
 	//This code is rancid, but I have no idea how else I'm supposed to implement it
 	switch(keycode)
@@ -193,52 +197,100 @@ void I_StartFrame (void)
 void I_GetEvent(void)
 {
 	event_t event;
-	Uint32 x;
-	
 	SDL_Event SDL_event;
-	while (SDL_PollEvent(&SDL_event))
+	boolean focus_yield = false;
+	
+	while (SDL_PollEvent(NULL) || focus_yield)
 	{
+		SDL_Event SDL_event;
+		SDL_WaitEvent(&SDL_event);
+		
 		switch (SDL_event.type)
 		{
 			case SDL_QUIT:
 				I_Quit();
 				break;
 			case SDL_KEYDOWN:
+				if (focus_yield)
+					break;
 				event.type = ev_keydown;
 				event.data1 = TranslateKey(SDL_event.key.keysym.sym);
+				keys[event.data1] = true;
 				D_PostEvent(&event);
 				break;
 			case SDL_KEYUP:
+				if (focus_yield)
+					break;
 				event.type = ev_keyup;
 				event.data1 = TranslateKey(SDL_event.key.keysym.sym);
+				keys[event.data1] = false;
 				D_PostEvent(&event);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
+				if (focus_yield)
+					break;
+				switch (SDL_event.button.button)
+				{
+					case SDL_BUTTON_LEFT:
+						if (SDL_event.button.state == SDL_PRESSED)
+							mouse_down |= 1;
+						else
+							mouse_down &= ~1;
+						break;
+					case SDL_BUTTON_RIGHT:
+						if (SDL_event.button.state == SDL_PRESSED)
+							mouse_down |= 2;
+						else
+							mouse_down &= ~2;
+						break;
+					case SDL_BUTTON_MIDDLE:
+						if (SDL_event.button.state == SDL_PRESSED)
+							mouse_down |= 4;
+						else
+							mouse_down &= ~4;
+						break;
+				}
 				if (!usemouse)
 					break;
 				event.type = ev_mouse;
-				x = SDL_GetMouseState(NULL, NULL);
-				event.data1 = 
-				    ((x & SDL_BUTTON_LMASK) ? 1 : 0) |
-				    ((x & SDL_BUTTON_RMASK) ? 2 : 0) |
-				    ((x & SDL_BUTTON_MMASK) ? 4 : 0);
+				event.data1 = mouse_down;
 				event.data2 = 0;
 				event.data3 = 0;
 				D_PostEvent(&event);
 				break;
 			case SDL_MOUSEMOTION:
+				if (focus_yield)
+					break;
 				if (!usemouse)
 					break;
 				event.type = ev_mouse;
-				x = SDL_event.motion.state;
-				event.data1 = 
-				    ((x & SDL_BUTTON_LMASK) ? 1 : 0) |
-				    ((x & SDL_BUTTON_RMASK) ? 2 : 0) |
-				    ((x & SDL_BUTTON_MMASK) ? 4 : 0);
+				event.data1 = mouse_down;
 				event.data2 =  SDL_event.motion.xrel << 2;
 				event.data3 = -SDL_event.motion.yrel << 2;
 				D_PostEvent(&event);
+				break;
+			case SDL_WINDOWEVENT:
+				switch (SDL_event.window.event)
+				{
+					case SDL_WINDOWEVENT_FOCUS_LOST:
+						focus_yield = true;
+						mouse_down = 0;
+						for (int i = 0; i < 0x100; i++)
+						{
+							if (keys[i])
+							{
+								event.type = ev_keyup;
+								event.data1 = i;
+								keys[i] = false;
+								D_PostEvent(&event);
+							}
+						}
+						break;
+					case SDL_WINDOWEVENT_FOCUS_GAINED:
+						focus_yield = false;
+						break;
+				}
 				break;
 		}
 	}
@@ -378,6 +430,11 @@ void I_InitGraphics(void)
 	if (SDL_SetRelativeMouseMode(SDL_TRUE) < 0)
 		I_Error((char*)SDL_GetError());
 	
+	//Initialize input state
+	mouse_down = 0;
+	memset(keys, 0, 0x100);
+	
 	//Allocate screen 0
-	screens[0] = malloc(SCREENWIDTH * SCREENHEIGHT);
+	if (screens[0] == NULL)
+		screens[0] = malloc(SCREENWIDTH * SCREENHEIGHT);
 }
