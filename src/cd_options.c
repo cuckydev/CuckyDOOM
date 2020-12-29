@@ -4,6 +4,7 @@
 #include "i_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "d_main.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "s_sound.h"
@@ -47,6 +48,19 @@ void CD_ChangeScreenSize()
 void CD_ChangeGamma()
 {
 	I_SetPalette(W_CacheLumpName("PLAYPAL",PU_CACHE));
+}
+
+void CD_ChangeUseMouse()
+{
+	if (usemouse == false)
+	{
+		event_t event;
+		event.type = ev_mouse;
+		event.data1 = 0;
+		event.data2 = 0;
+		event.data3 = 0;
+		D_PostEvent(&event);
+	}
 }
 
 //Options

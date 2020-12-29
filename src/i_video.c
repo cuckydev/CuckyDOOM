@@ -49,6 +49,8 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #include "doomdef.h"
 
+extern long usemouse;
+
 #define POINTER_WARP_COUNTDOWN	1
 
 SDL_Window *SDL_window = NULL;
@@ -213,6 +215,8 @@ void I_GetEvent(void)
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
+				if (!usemouse)
+					break;
 				event.type = ev_mouse;
 				x = SDL_GetMouseState(NULL, NULL);
 				event.data1 = 
@@ -224,6 +228,8 @@ void I_GetEvent(void)
 				D_PostEvent(&event);
 				break;
 			case SDL_MOUSEMOTION:
+				if (!usemouse)
+					break;
 				event.type = ev_mouse;
 				x = SDL_event.motion.state;
 				event.data1 = 
