@@ -35,6 +35,8 @@ rcsid[] = "$Id: hu_stuff.c,v 1.4 1997/02/03 16:47:52 b1 Exp $";
 #include "hu_lib.h"
 #include "w_wad.h"
 
+#include "i_video.h"
+
 #include "s_sound.h"
 
 #include "doomstat.h"
@@ -102,7 +104,7 @@ static boolean		message_nottobefuckedwith;
 static hu_stext_t	w_message;
 static int		message_counter;
 
-extern int		showMessages;
+extern long		showMessages;
 extern boolean		automapactive;
 
 static boolean		headsupactive = false;
@@ -465,6 +467,8 @@ void HU_Start(void)
 	 s = HU_TITLE2;
 	 break;
     }
+    
+    I_SetWindowSubtitle(s);
     
     while (*s)
 	HUlib_addCharToTextLine(&w_title, *(s++));

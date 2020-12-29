@@ -83,6 +83,8 @@ add_executable(CuckyDOOM WIN32
 	src/z_zone.c
 	src/info.c
 	src/sounds.c
+	src/cd_wadpick.c
+	src/cd_options.c
 )
 
 target_include_directories(CuckyDOOM PRIVATE "src")

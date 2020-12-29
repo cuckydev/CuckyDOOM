@@ -186,7 +186,7 @@ void D_ProcessEvents (void)
 // wipegamestate can be set to -1 to force a wipe on the next draw
 gamestate_t     wipegamestate = GS_DEMOSCREEN;
 extern  boolean setsizeneeded;
-extern  int             showMessages;
+extern  long             showMessages;
 void R_ExecuteSetViewSize (void);
 
 void D_Display (void)
@@ -514,6 +514,7 @@ void D_AdvanceDemo (void)
 //
 void D_StartTitle (void)
 {
+	I_SetWindowSubtitle(NULL);
     gameaction = ga_nothing;
     demosequence = -1;
     D_AdvanceDemo ();
@@ -550,26 +551,11 @@ void D_AddFile (char *file)
 // to determine whether registered/commercial features
 // should be executed (notably loading PWAD's).
 //
-typedef struct
-{
-	const char *name;
-	GameMode_t gamemode;
-	Language_t language;
-} wadchk_t;
-
-const wadchk_t wadchk[] = {
-	{"doom.wad", registered, english},
-	{"doom1.wad", shareware, english},
-	{"doomu.wad", retail, english},
-	{"doom2.wad", commercial, english},
-	{"doom2f.wad", commercial, french},
-	{"plutonia.wad", commercial, english},
-	{"tnt.wad", commercial, english},
-	{NULL, indetermined, english},
-};
+#include "cd_wadpick.h"
 
 void IdentifyVersion(void)
 {
+	/*
 	//TODO: WAD picker?
 	char *path;
 	for (const wadchk_t *wad = wadchk; wad->name != NULL; wad++)
@@ -590,8 +576,8 @@ void IdentifyVersion(void)
 		}
 		free(path);
 	}
-	
-	//Didn't find a WAD
+	*/
+	CD_WadPicker();
 }
 
 //
@@ -675,7 +661,7 @@ void FindResponseFile (void)
 void D_DoomMain (void)
 {
 	int             p;
-	char                    file[256];
+	char                    file[1060];
 	
 	//Get executable directory
 	int cutpoint = strlen(myargv[0]) - 1;
@@ -915,10 +901,7 @@ void D_DoomMain (void)
 	p = M_CheckParm("-loadgame");
 	if (p && p < myargc - 1)
 	{
-		if (M_CheckParm("-cdrom"))
-			sprintf(file, "c:\\doomdata\\"SAVEGAMENAME"%c.dsg",myargv[p + 1][0]);
-		else
-			sprintf(file, SAVEGAMENAME"%c.dsg",myargv[p + 1][0]);
+		sprintf(file,"%s/"SAVEGAMENAME"%d.dsg",executable_dir,myargv[p + 1][0]);
 		G_LoadGame (file);
 	}
 	

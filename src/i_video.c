@@ -65,6 +65,26 @@ Uint32 SDL_gamepal[256];
 // to use ....
 static int	multiply=1;
 
+//
+// Set the window's subtitle
+//
+const char *base_title = "CuckyDOOM";
+
+void I_SetWindowSubtitle(const char *title)
+{
+	if (title != NULL)
+	{
+		char *cat_title = malloc(strlen(base_title) + 3 + strlen(title) + 1);
+		sprintf(cat_title, "%s - %s", base_title, title);
+		SDL_SetWindowTitle(SDL_window, cat_title);
+		free(cat_title);
+	}
+	else
+	{
+		SDL_SetWindowTitle(SDL_window, base_title);
+	}
+}
+
 
 //
 // Translate an SDL_KeyCode to DOOM keycodes
@@ -151,9 +171,6 @@ void I_ShutdownGraphics(void)
 		SDL_DestroyRenderer(SDL_renderer);
 	if (SDL_window != NULL)
 		SDL_DestroyWindow(SDL_window);
-	
-	//Quit SDL2 video backend
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 
@@ -181,6 +198,9 @@ void I_GetEvent(void)
 	{
 		switch (SDL_event.type)
 		{
+			case SDL_QUIT:
+				I_Quit();
+				break;
 			case SDL_KEYDOWN:
 				event.type = ev_keydown;
 				event.data1 = TranslateKey(SDL_event.key.keysym.sym);
@@ -307,9 +327,6 @@ TEMPLATE_SURFFUNC(SDL_SurfFunc_4, Uint32)
 
 void I_InitGraphics(void)
 {
-	//Attach SIGINT to quit event
-	signal(SIGINT, (void (*)(int)) I_Quit);
-	
 	//Get game magnification
 	if (M_CheckParm("-2"))
 		multiply = 2;
@@ -318,12 +335,8 @@ void I_InitGraphics(void)
 	if (M_CheckParm("-4"))
 		multiply = 4;
 	
-	//Ensure SDL2 is initialized
-	if (SDL_WasInit(SDL_INIT_EVERYTHING) != (SDL_INIT_EVERYTHING & ~SDL_INIT_NOPARACHUTE))
-		SDL_Init(SDL_INIT_EVERYTHING);
-	
 	//Create window
-	if ((SDL_window = SDL_CreateWindow("CuckyDOOM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREENWIDTH * multiply, SCREENHEIGHT * multiply, 0)) == NULL)
+	if ((SDL_window = SDL_CreateWindow(base_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREENWIDTH * multiply, SCREENHEIGHT * multiply * 240 / 200, 0)) == NULL)
 		I_Error((char*)SDL_GetError());
 	
 	//Create renderer

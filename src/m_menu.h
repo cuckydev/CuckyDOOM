@@ -55,6 +55,13 @@ void M_Init (void);
 void M_StartControlPanel (void);
 
 
+void
+M_DrawThermo
+( int	x,
+  int	y,
+  int	thermWidth,
+  int	thermDot );
+
 
 
 

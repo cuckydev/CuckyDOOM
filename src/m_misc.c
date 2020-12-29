@@ -195,6 +195,7 @@ extern long	viewwidth;
 extern long	viewheight;
 
 extern long	mouseSensitivity;
+extern long	mouseMove;
 extern long	showMessages;
 
 extern long	detailLevel;
@@ -221,59 +222,54 @@ typedef struct
 
 default_t	defaults[] =
 {
-    {"mouse_sensitivity", &mouseSensitivity, 5},
-    {"sfx_volume", &snd_SfxVolume, 8},
-    {"music_volume", &snd_MusicVolume, 8},
-    {"show_messages", &showMessages, 1},
-    
-
-#ifdef NORMALUNIX
-    {"key_right", &key_right, KEY_RIGHTARROW},
-    {"key_left", &key_left, KEY_LEFTARROW},
-    {"key_up", &key_up, KEY_UPARROW},
-    {"key_down", &key_down, KEY_DOWNARROW},
-    {"key_strafeleft", &key_strafeleft, ','},
-    {"key_straferight", &key_straferight, '.'},
-
-    {"key_fire", &key_fire, KEY_RCTRL},
-    {"key_use", &key_use, ' '},
-    {"key_strafe", &key_strafe, KEY_RALT},
-    {"key_speed", &key_speed, KEY_RSHIFT},
-#endif
-
-    {"mb_used", &mb_used, 8},
-
-    {"use_mouse", &usemouse, 1},
-    {"mouseb_fire", &mousebfire, 0},
-    {"mouseb_strafe", &mousebstrafe, 1},
-    {"mouseb_forward", &mousebforward, 2},
-
-    {"use_joystick", &usejoystick, 0},
-    {"joyb_fire", &joybfire, 0},
-    {"joyb_strafe", &joybstrafe, 1},
-    {"joyb_use", &joybuse, 3},
-    {"joyb_speed", &joybspeed, 2},
-
-    {"screenblocks", &screenblocks, 9},
-    {"detaillevel", &detailLevel, 0},
-
-    {"snd_channels", &numChannels, 3},
-
-
-
-    {"usegamma", &usegamma, 0},
-
-    {"chatmacro0", (long*) &chat_macros[0], (long)HUSTR_CHATMACRO0},
-    {"chatmacro1", (long*) &chat_macros[1], (long)HUSTR_CHATMACRO1},
-    {"chatmacro2", (long*) &chat_macros[2], (long)HUSTR_CHATMACRO2},
-    {"chatmacro3", (long*) &chat_macros[3], (long)HUSTR_CHATMACRO3},
-    {"chatmacro4", (long*) &chat_macros[4], (long)HUSTR_CHATMACRO4},
-    {"chatmacro5", (long*) &chat_macros[5], (long)HUSTR_CHATMACRO5},
-    {"chatmacro6", (long*) &chat_macros[6], (long)HUSTR_CHATMACRO6},
-    {"chatmacro7", (long*) &chat_macros[7], (long)HUSTR_CHATMACRO7},
-    {"chatmacro8", (long*) &chat_macros[8], (long)HUSTR_CHATMACRO8},
-    {"chatmacro9", (long*) &chat_macros[9], (long)HUSTR_CHATMACRO9},
-
+	{"mouse_sensitivity", &mouseSensitivity, 5},
+	{"mouse_move", &mouseMove, 0},
+	{"sfx_volume", &snd_SfxVolume, 8},
+	{"music_volume", &snd_MusicVolume, 8},
+	{"show_messages", &showMessages, 1},
+	
+	{"key_right", &key_right, KEY_RIGHTARROW},
+	{"key_left", &key_left, KEY_LEFTARROW},
+	{"key_up", &key_up, KEY_UPARROW},
+	{"key_down", &key_down, KEY_DOWNARROW},
+	{"key_strafeleft", &key_strafeleft, ','},
+	{"key_straferight", &key_straferight, '.'},
+	
+	{"key_fire", &key_fire, KEY_RCTRL},
+	{"key_use", &key_use, ' '},
+	{"key_strafe", &key_strafe, KEY_RALT},
+	{"key_speed", &key_speed, KEY_RSHIFT},
+	
+	{"mb_used", &mb_used, 8},
+	
+	{"use_mouse", &usemouse, 1},
+	{"mouseb_fire", &mousebfire, 0},
+	{"mouseb_strafe", &mousebstrafe, 1},
+	{"mouseb_forward", &mousebforward, 2},
+	
+	{"use_joystick", &usejoystick, 0},
+	{"joyb_fire", &joybfire, 0},
+	{"joyb_strafe", &joybstrafe, 1},
+	{"joyb_use", &joybuse, 3},
+	{"joyb_speed", &joybspeed, 2},
+	
+	{"screenblocks", &screenblocks, 9},
+	{"detaillevel", &detailLevel, 0},
+	
+	{"snd_channels", &numChannels, 3},
+	
+	{"usegamma", &usegamma, 0},
+	
+	{"chatmacro0", (long*) &chat_macros[0], (long)HUSTR_CHATMACRO0},
+	{"chatmacro1", (long*) &chat_macros[1], (long)HUSTR_CHATMACRO1},
+	{"chatmacro2", (long*) &chat_macros[2], (long)HUSTR_CHATMACRO2},
+	{"chatmacro3", (long*) &chat_macros[3], (long)HUSTR_CHATMACRO3},
+	{"chatmacro4", (long*) &chat_macros[4], (long)HUSTR_CHATMACRO4},
+	{"chatmacro5", (long*) &chat_macros[5], (long)HUSTR_CHATMACRO5},
+	{"chatmacro6", (long*) &chat_macros[6], (long)HUSTR_CHATMACRO6},
+	{"chatmacro7", (long*) &chat_macros[7], (long)HUSTR_CHATMACRO7},
+	{"chatmacro8", (long*) &chat_macros[8], (long)HUSTR_CHATMACRO8},
+	{"chatmacro9", (long*) &chat_macros[9], (long)HUSTR_CHATMACRO9},
 };
 
 int	numdefaults;

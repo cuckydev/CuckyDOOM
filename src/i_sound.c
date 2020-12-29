@@ -594,17 +594,10 @@ void I_ShutdownSound(void)
 	for (int i = 1; i < NUMSFX; i++) //SFX 0 is never initialized
 		free(sfx_buffer[i].data);
 	free(sfx_buffer);
-	
-	//Quit SDL2 sound backend
-	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 void I_InitSound()
 {
-	//Ensure SDL2 is initialized
-	if (SDL_WasInit(SDL_INIT_EVERYTHING) != (SDL_INIT_EVERYTHING & ~SDL_INIT_NOPARACHUTE))
-		SDL_Init(SDL_INIT_EVERYTHING);
-	
 	//Load sound buffers
 	sfx_buffer = malloc(sizeof(sfxbuffer_t) * NUMSFX);
 	for (int i = 1; i < NUMSFX; i++)

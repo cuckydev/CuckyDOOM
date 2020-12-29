@@ -32,6 +32,8 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "SDL.h"
+
 #include "doomdef.h"
 #include "m_misc.h"
 #include "i_video.h"
@@ -106,8 +108,11 @@ int  I_GetTime (void)
 //
 void I_Init (void)
 {
-    I_InitSound();
-    //  I_InitGraphics();
+	if (!SDL_WasInit(SDL_INIT_EVERYTHING))
+		if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+			I_Error((char*)SDL_GetError());
+	I_InitSound();
+	//  I_InitGraphics();
 }
 
 //
@@ -120,6 +125,7 @@ void I_Quit (void)
     I_ShutdownMusic();
     M_SaveDefaults ();
     I_ShutdownGraphics();
+    SDL_Quit();
     exit(0);
 }
 
@@ -178,6 +184,8 @@ void I_Error (char *error, ...)
 
     D_QuitNetGame ();
     I_ShutdownGraphics();
+    
+    SDL_Quit();
     
     exit(-1);
 }

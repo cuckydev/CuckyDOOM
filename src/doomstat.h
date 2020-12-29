@@ -241,6 +241,7 @@ extern  int		maxammo[NUMAMMO];
 //
 
 // File handling stuff.
+extern	char		executable_dir[1024];
 extern	char		basedefault[1050];
 extern  FILE*		debugfile;
 
@@ -253,6 +254,7 @@ extern  boolean         precache;
 extern  gamestate_t     wipegamestate;
 
 extern  long            mouseSensitivity;
+extern  long            mouseMove;
 //?
 // debug flag to cancel adaptiveness
 extern  boolean         singletics;	
