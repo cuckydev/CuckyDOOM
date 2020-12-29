@@ -1,6 +1,7 @@
 #include "cd_options.h"
 
 #include "v_video.h"
+#include "i_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
 #include "m_menu.h"
@@ -14,6 +15,7 @@
 //Option externs
 extern long showMessages;
 
+extern long usemouse;
 extern long mouseSensitivity;
 extern long mouseMove;
 
@@ -92,6 +94,7 @@ const option_t options[] = {
 	{"Gamma",             &usegamma,         CD_ChangeGamma,        optiontype_int,    .type_int =    {0, 4}},
 	
 	{"Input",             NULL,              NULL,                  optiontype_label,  .type_label =  {0}},
+	{"Use Mouse",         &usemouse,         NULL,                  optiontype_bool,   .type_bool =   {0}},
 	{"Mouse Sensitivity", &mouseSensitivity, NULL,                  optiontype_int,    .type_int =    {0, 15}},
 	{"Mouse Move",        &mouseMove,        NULL,                  optiontype_bool,   .type_bool =   {0}},
 	
