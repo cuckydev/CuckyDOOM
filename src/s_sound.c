@@ -134,6 +134,41 @@ void S_Start(void)
 	// kill all playing sounds at start of level
 	//  (trust me - a good idea)
 	I_StopAllSound();
+	
+	// start new music for the level
+	mus_paused = 0;
+	
+	int mnum;
+	if (gamemode == commercial)
+		mnum = mus_runnin + gamemap - 1;
+	else
+	{
+		int spmus[]=
+		{
+			// Song - Who? - Where?
+			mus_e3m4,	// American	e4m1
+			mus_e3m2,	// Romero	e4m2
+			mus_e3m3,	// Shawn	e4m3
+			mus_e1m5,	// American	e4m4
+			mus_e2m7,	// Tim 	e4m5
+			mus_e2m4,	// Romero	e4m6
+			mus_e2m6,	// J.Anderson	e4m7 CHIRON.WAD
+			mus_e2m5,	// Shawn	e4m8
+			mus_e1m9	// Tim		e4m9
+		};
+
+		if (gameepisode < 4)
+			mnum = mus_e1m1 + (gameepisode-1)*9 + gamemap-1;
+		else
+			mnum = spmus[gamemap-1];
+	}	
+	
+	// HACK FOR COMMERCIAL
+	//  if (commercial && mnum > mus_e3m9)	
+	//      mnum -= mus_e3m9;
+	
+	S_ChangeMusic(mnum, true);
+	
 	/*
   int cnum;
   int mnum;
@@ -519,7 +554,7 @@ S_ChangeMusic
 
     // load & register it
     music->data = (void *) W_CacheLumpNum(music->lumpnum, PU_MUSIC);
-    music->handle = I_RegisterSong(music->data);
+    music->handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
 
     // play it
     I_PlaySong(music->handle, looping);

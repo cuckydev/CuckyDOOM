@@ -140,6 +140,10 @@ wbstartstruct_t wminfo;               	// parms for world map / intermission
 short		consistancy[MAXPLAYERS][BACKUPTICS]; 
  
 byte*		savebuffer;
+
+skill_t	d_skill; 
+int     d_episode; 
+int     d_map; 
  
  
 // 
@@ -234,6 +238,8 @@ int G_CmdChecksum (ticcmd_t* cmd)
 // or reads it from the demo buffer. 
 // If recording a demo, write it out 
 // 
+extern long alwaysRun;
+
 void G_BuildTiccmd (ticcmd_t* cmd) 
 { 
 	int		i; 
@@ -253,6 +259,8 @@ void G_BuildTiccmd (ticcmd_t* cmd)
 	
 	strafe = gamekeydown[key_strafe] || mousebuttons[mousebstrafe] || joybuttons[joybstrafe]; 
 	speed = gamekeydown[key_speed] || joybuttons[joybspeed];
+	if (alwaysRun)
+		speed = !speed;
 	
 	forward = side = 0;
 	
@@ -565,8 +573,9 @@ boolean G_Responder (event_t* ev)
 	mousebuttons[0] = ev->data1 & 1; 
 	mousebuttons[1] = ev->data1 & 2; 
 	mousebuttons[2] = ev->data1 & 4; 
-	mousex = ev->data2*(mouseSensitivity+5)/10; 
-	mousey = ev->data3*(mouseSensitivity+5)/10; 
+	long mouseSensitivityRamp = (long)powf(mouseSensitivity, 1.5f);
+	mousex = ev->data2*(mouseSensitivityRamp+5)/10; 
+	mousey = ev->data3*(mouseSensitivityRamp+5)/10; 
 	return true;    // eat events 
  
       case ev_joystick: 
@@ -1206,14 +1215,14 @@ void G_DoLoadGame (void)
 	return;				// bad version 
     save_p += VERSIONSIZE; 
 			 
-    gameskill = *save_p++; 
-    gameepisode = *save_p++; 
-    gamemap = *save_p++; 
+    d_skill = *save_p++; //changed from gameskill, gameepisode, and such to avoid issues with nightmare
+    d_episode = *save_p++; 
+    d_map = *save_p++; 
     for (i=0 ; i<MAXPLAYERS ; i++) 
 	playeringame[i] = *save_p++; 
 
     // load a base level 
-    G_InitNew (gameskill, gameepisode, gamemap); 
+    G_InitNew (d_skill, d_episode, d_map); 
  
     // get the times 
     a = *save_p++; 
@@ -1311,9 +1320,6 @@ void G_DoSaveGame (void)
 // Can be called by the startup code or the menu task,
 // consoleplayer, displayplayer, playeringame[] should be set. 
 //
-skill_t	d_skill; 
-int     d_episode; 
-int     d_map; 
  
 void
 G_DeferedInitNew

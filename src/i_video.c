@@ -75,20 +75,17 @@ static int	multiply=1;
 // Set the window's subtitle
 //
 const char *base_title = "CuckyDOOM";
+char *cat_title = NULL;
 
 void I_SetWindowSubtitle(const char *title)
 {
+	free(cat_title);
 	if (title != NULL)
 	{
-		char *cat_title = malloc(strlen(base_title) + 3 + strlen(title) + 1);
+		cat_title = malloc(strlen(base_title) + 3 + strlen(title) + 1);
 		sprintf(cat_title, "%s - %s", base_title, title);
-		SDL_SetWindowTitle(SDL_window, cat_title);
-		free(cat_title);
 	}
-	else
-	{
-		SDL_SetWindowTitle(SDL_window, base_title);
-	}
+	SDL_SetWindowTitle(SDL_window, cat_title);
 }
 
 
@@ -397,7 +394,7 @@ void I_InitGraphics(void)
 		multiply = 4;
 	
 	//Create window
-	if ((SDL_window = SDL_CreateWindow(base_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREENWIDTH * multiply, SCREENHEIGHT * multiply * 240 / 200, 0)) == NULL)
+	if ((SDL_window = SDL_CreateWindow((cat_title != NULL) ? cat_title : base_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREENWIDTH * multiply, SCREENHEIGHT * multiply * 240 / 200, 0)) == NULL)
 		I_Error((char*)SDL_GetError());
 	
 	//Create renderer

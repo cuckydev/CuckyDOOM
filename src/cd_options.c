@@ -20,8 +20,11 @@ extern long usemouse;
 extern long mouseSensitivity;
 extern long mouseMove;
 
+extern long alwaysRun;
+
 extern long snd_SfxVolume;
 extern long snd_MusicVolume;
+extern long snd_RandPitch;
 
 extern long screenSize;
 extern long screenblocks;
@@ -108,6 +111,7 @@ const option_t options[] = {
 	{"Gamma",             &usegamma,         CD_ChangeGamma,        optiontype_int,    .type_int =    {0, 4}},
 	
 	{"Input",             NULL,              NULL,                  optiontype_label,  .type_label =  {0}},
+	{"Always Run",        &alwaysRun,        NULL,                  optiontype_bool,   .type_bool =   {0}},
 	{"Use Mouse",         &usemouse,         NULL,                  optiontype_bool,   .type_bool =   {0}},
 	{"Mouse Sensitivity", &mouseSensitivity, NULL,                  optiontype_int,    .type_int =    {0, 15}},
 	{"Mouse Move",        &mouseMove,        NULL,                  optiontype_bool,   .type_bool =   {0}},
@@ -115,6 +119,7 @@ const option_t options[] = {
 	{"Sound",             NULL,              NULL,                  optiontype_label,  .type_label =  {0}},
 	{"Sound Volume",      &snd_SfxVolume,    NULL,                  optiontype_int,    .type_int =    {0, 15}},
 	{"Music Volume",      &snd_MusicVolume,  NULL,                  optiontype_int,    .type_int =    {0, 15}},
+	{"Random Pitch",      &snd_RandPitch,    NULL,                  optiontype_int,    .type_int =    {0, 8}},
 	
 	{NULL,                NULL,              NULL,                  optiontype_label,  .type_label = {0}},
 };

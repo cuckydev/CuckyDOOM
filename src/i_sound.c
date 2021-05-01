@@ -44,7 +44,9 @@ rcsid[] = "$Id: i_unix.c,v 1.5 1997/02/03 22:45:10 b1 Exp $";
 #include "doomdef.h"
 
 #include "SDL.h"
+#include "wildmidi_lib.h"
 
+long snd_RandPitch; //has default
 
 // when to clip out sounds
 // Does not fit the large outdoor areas.
@@ -76,6 +78,13 @@ rcsid[] = "$Id: i_unix.c,v 1.5 1997/02/03 22:45:10 b1 Exp $";
 // Needed for calling the actual sound output.
 #define SAMPLECOUNT		1024
 #define SAMPLERATE		44100	// Hz
+
+//Music state
+static boolean music_init;
+static midi *music_midi;
+static boolean music_playing;
+char *wildmidi_config_path;
+static int	looping=0;
 
 //Sound buffers
 typedef struct
@@ -168,18 +177,51 @@ void I_AudioCallback(void* userdata, Uint8* buffer, int len)
 		channel = next;
 	}
 	
-	//Write mix stream to stream
-	Uint16 *stream = (Uint16*)buffer;
-	mixp = mix_stream;
-	for (int i = 0; i < samples; i++)
+	//Mix music
+	memset(buffer, 0, len);
+	
+	if (music_playing)
 	{
-		if (*mixp < -0x7FFF)
+		//Start reading midi
+		size_t music_bleft = len;
+		char *music_buff = (char*)buffer;
+		
+		while (1)
+		{
+			//Read into buffer
+			size_t bytes = (size_t)WildMidi_GetOutput(music_midi, music_buff, music_bleft);
+			music_buff += bytes;
+			music_bleft -= bytes;
+			if (music_bleft == 0)
+				break;
+			
+			if (looping)
+			{
+				//Repeat
+				unsigned long int tgt = 0;
+				WildMidi_FastSeek(music_midi, &tgt);
+			}
+			else
+			{
+				//Stop playing
+				music_playing = false;
+				break;
+			}
+		}
+	}
+	
+	//Write mix stream to stream
+	Sint16 *stream = (Uint16*)buffer;
+	mixp = mix_stream;
+	for (int i = 0; i < samples; i++, mixp++)
+	{
+		Sint32 res = (*stream * snd_MusicVolume / 8) + *mixp;
+		if (res < -0x7FFF)
 			*stream++ = -0x7FFF;
-		else if (*mixp > 0x7FFF)
+		else if (res > 0x7FFF)
 			*stream++ = 0x7FFF;
 		else
-			*stream++ = *mixp;
-		mixp++;
+			*stream++ = res;
 	}
 }
 
@@ -326,14 +368,21 @@ int I_AdjustSoundParams
     {
 	*vol = snd_SfxVolume;
     }
-    else if (gamemap == 8)
+    else if (gamemode != commercial && gamemap == 8)
     {
-	if (approx_dist > S_CLIPPING_DIST)
-	    approx_dist = S_CLIPPING_DIST;
-
-	*vol = 15+ ((snd_SfxVolume-15)
-		    *((S_CLIPPING_DIST - approx_dist)>>FRACBITS))
-	    / S_ATTENUATOR;
+		if (snd_SfxVolume <= 15)
+		{
+			*vol = snd_SfxVolume;
+		}
+		else
+		{
+			if (approx_dist > S_CLIPPING_DIST)
+			approx_dist = S_CLIPPING_DIST;
+			
+			*vol = 15+ ((snd_SfxVolume-15)
+				*((S_CLIPPING_DIST - approx_dist)>>FRACBITS))
+			/ S_ATTENUATOR;
+		}
     }
     else
     {
@@ -456,7 +505,10 @@ I_StartSound
 	channel->sfx = sfx;
 	channel->buffer = &sfx_buffer[id];
 	channel->pos.value = 0x00000000;
-	channel->inc.value = 0x10000 * channel->buffer->freq / SAMPLERATE;//(Uint32)(pow(2.0, ((pitch-128.0)/64.0))*65536.0); //sound pitch randomization that doesn't happen in the DOS version, I assume becasue it sounds goofy as fuck
+	if (snd_RandPitch)
+		channel->inc.value = (uint32_t)(pow(2.0, ((pitch-128.0)*(0.125*snd_RandPitch)/64.0))*65536.0) * channel->buffer->freq / SAMPLERATE; //sound pitch randomization that doesn't happen in the DOS version, I assume becasue it sounds goofy as fuck
+	else
+		channel->inc.value = 0x10000 * channel->buffer->freq / SAMPLERATE;
 	
 	I_ApplySoundParam(channel, vol, sep);
 	
@@ -597,6 +649,13 @@ void I_ShutdownSound(void)
 			free(sfx_buffer[i].data);
 		free(sfx_buffer);
 	}
+	
+	//Stop wildmidi
+	if (music_init)
+	{
+		WildMidi_Shutdown();
+		music_init = false;
+	}
 }
 
 void I_InitSound()
@@ -621,6 +680,12 @@ void I_InitSound()
 	//Allocate mix buffer
 	mix_stream = malloc(4 * 2 * SAMPLECOUNT);
 	
+	//Initialize wildmidi
+	if (WildMidi_Init(wildmidi_config_path, SAMPLERATE, 0) == 0)
+		music_init = true;
+	//else
+	//	I_Error("[I_InitSound] Failed to initialize WildMIDI");
+	
 	//Start playing audio device
 	SDL_PauseAudioDevice(SDL_audiodevice, 0);
 }
@@ -636,55 +701,118 @@ void I_InitSound()
 void I_InitMusic(void)		{ }
 void I_ShutdownMusic(void)	{ }
 
-static int	looping=0;
 static int	musicdies=-1;
 
-void I_PlaySong(int handle, int looping)
+void I_PlaySong(int handle, int _looping)
 {
-  // UNUSED.
-  handle = looping = 0;
-  musicdies = gametic + TICRATE*30;
+	if (!music_init)
+		return;
+	
+	//Lock audio device
+	SDL_LockAudioDevice(SDL_audiodevice);
+	
+	//Play song
+	music_playing = true;
+	looping = _looping;
+	//WildMidi_SetOption(music_midi, WM_MO_LOOP, looping ? WM_MO_LOOP : 0);
+	
+	//Unlock audio device
+	SDL_UnlockAudioDevice(SDL_audiodevice);
 }
 
 void I_PauseSong (int handle)
 {
-  // UNUSED.
-  handle = 0;
+	if (!music_init)
+		return;
+	
+	//Lock audio device
+	SDL_LockAudioDevice(SDL_audiodevice);
+	
+	//Pause song
+	music_playing = false;
+	
+	//Unlock audio device
+	SDL_UnlockAudioDevice(SDL_audiodevice);
 }
 
 void I_ResumeSong (int handle)
 {
-  // UNUSED.
-  handle = 0;
+	if (!music_init)
+		return;
+	
+	//Lock audio device
+	SDL_LockAudioDevice(SDL_audiodevice);
+	
+	//Resume song
+	music_playing = true;
+	
+	//Unlock audio device
+	SDL_UnlockAudioDevice(SDL_audiodevice);
 }
 
 void I_StopSong(int handle)
 {
-  // UNUSED.
-  handle = 0;
-  
-  looping = 0;
-  musicdies = 0;
+	if (!music_init)
+		return;
+	
+	//Lock audio device
+	SDL_LockAudioDevice(SDL_audiodevice);
+	
+	//Stop song
+	music_playing = false;
+	unsigned long int tgt = 0;
+	WildMidi_FastSeek(music_midi, &tgt);
+	
+	//Unlock audio device
+	SDL_UnlockAudioDevice(SDL_audiodevice);
 }
 
 void I_UnRegisterSong(int handle)
 {
-  // UNUSED.
-  handle = 0;
+	if (!music_init)
+		return;
+	
+	//Lock audio device
+	SDL_LockAudioDevice(SDL_audiodevice);
+	
+	//Close song
+	WildMidi_Close(music_midi);
+	
+	//Unlock audio device
+	SDL_UnlockAudioDevice(SDL_audiodevice);
 }
 
-int I_RegisterSong(void* data)
+int I_RegisterSong(void* data, size_t size)
 {
-  // UNUSED.
-  data = NULL;
-  
-  return 1;
+	if (!music_init)
+		return false;
+	
+	//Lock audio device
+	SDL_LockAudioDevice(SDL_audiodevice);
+	
+	//Read song
+	music_midi = WildMidi_OpenBuffer((void*)data, size);
+	
+	//Unlock audio device
+	SDL_UnlockAudioDevice(SDL_audiodevice);
+	
+	return true;
 }
 
 // Is the song playing?
 int I_QrySongPlaying(int handle)
 {
-  // UNUSED.
-  handle = 0;
-  return looping || musicdies > gametic;
+	if (!music_init)
+		return false;
+	
+	//Lock audio device
+	SDL_LockAudioDevice(SDL_audiodevice);
+	
+	//Get playing state
+	boolean playing = music_playing;
+	
+	//Unlock audio device
+	SDL_UnlockAudioDevice(SDL_audiodevice);
+	
+	return playing;
 }

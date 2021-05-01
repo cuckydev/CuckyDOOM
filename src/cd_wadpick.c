@@ -7,6 +7,7 @@
 #include "doomstat.h"
 #include "i_system.h"
 #include "d_main.h"
+#include "m_argv.h"
 
 #include "cd_wadpick_bmp.inc.c"
 
@@ -264,9 +265,25 @@ void CD_WadPicker()
 		}
 		
 		//Draw title bar
-		static const char *title = "CuckyDOOM - Wad Picker";
+		static const char *title = "CuckyDOOM - WAD Picker";
 		CD_WadPick_DrawText((SCREENWIDTH - CD_WadPick_GetTextWidth(title)) / 2, 11, title, 0x10, 0x10, 0x10);
 		CD_WadPick_DrawText((SCREENWIDTH - CD_WadPick_GetTextWidth(title)) / 2, 10, title, 0xFF, 0xFF, 0xFF);
+		
+		//Draw arguments
+		if (myargc > 1)
+		{
+			static const char *notif = "Running with arguments:";
+			CD_WadPick_DrawText(12, SCREENHEIGHT - 29, notif, 0x10, 0x10, 0x10);
+			CD_WadPick_DrawText(12, SCREENHEIGHT - 30, notif, 0xFF, 0xFF, 0xFF);
+		}
+		
+		int x = 8;
+		for (int i = 1; i < myargc; i++)
+		{
+			CD_WadPick_DrawText(x, SCREENHEIGHT - 15, myargv[i], 0x10, 0x10, 0x10);
+			CD_WadPick_DrawText(x, SCREENHEIGHT - 16, myargv[i], 0xFF, 0xFF, 0xFF);
+			x += CD_WadPick_GetTextWidth(myargv[i]) + 6;
+		}
 		
 		//Present renderer
 		SDL_RenderPresent(wadpick_renderer);

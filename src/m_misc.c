@@ -198,6 +198,8 @@ extern long	mouseSensitivity;
 extern long	mouseMove;
 extern long	showMessages;
 
+extern long alwaysRun;
+
 extern long	detailLevel;
 
 extern long	screenblocks;
@@ -208,7 +210,9 @@ extern long   mb_used;
 
 extern char*	chat_macros[];
 
+extern long snd_RandPitch;
 
+extern char *wildmidi_config_path;
 
 typedef struct
 {
@@ -219,18 +223,23 @@ typedef struct
 
 default_t	defaults[] =
 {
-	{"mouse_sensitivity", &mouseSensitivity, 5},
+	{"mouse_sensitivity", &mouseSensitivity, 8},
 	{"mouse_move", &mouseMove, 0},
 	{"sfx_volume", &snd_SfxVolume, 8},
 	{"music_volume", &snd_MusicVolume, 8},
+	{"sfx_randpitch", &snd_RandPitch, 0},
 	{"show_messages", &showMessages, 1},
+	
+	{"wildmidi_config_path", (long*)&wildmidi_config_path, (long)"wildmidi.cfg"},
+	
+	{"always_run", &alwaysRun, 1},
 	
 	{"key_right", &key_right, KEY_RIGHTARROW},
 	{"key_left", &key_left, KEY_LEFTARROW},
-	{"key_up", &key_up, KEY_UPARROW},
-	{"key_down", &key_down, KEY_DOWNARROW},
-	{"key_strafeleft", &key_strafeleft, ','},
-	{"key_straferight", &key_straferight, '.'},
+	{"key_up", &key_up, 'w'},
+	{"key_down", &key_down, 's'},
+	{"key_strafeleft", &key_strafeleft, 'a'},
+	{"key_straferight", &key_straferight, 'd'},
 	
 	{"key_fire", &key_fire, KEY_RCTRL},
 	{"key_use", &key_use, ' '},

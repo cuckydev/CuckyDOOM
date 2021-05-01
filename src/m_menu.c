@@ -78,6 +78,8 @@ extern boolean		chat_on;		// in heads-up code
 long			mouseSensitivity;       // has default
 long			mouseMove;       // has default
 
+long alwaysRun; //has default
+
 // Show messages has default, 0 = off, 1 = on
 long			showMessages;
 	
